@@ -2,6 +2,7 @@ import React, { useCallback } from "react";
 import { useState } from "react";
 
 import Button from "../Button";
+import Toast from "../Toast";
 
 import styles from "./ToastPlayground.module.css";
 
@@ -10,6 +11,7 @@ const defaultVariant = VARIANT_OPTIONS[0];
 
 const ToastPlayground = () => {
   const { message, variant } = useToastConfig();
+  const [showToast, setShowToast] = useState(false);
 
   return (
     <div className={styles.wrapper}>
@@ -17,6 +19,14 @@ const ToastPlayground = () => {
         <img alt="Cute toast mascot" src="/toast.png" />
         <h1>Toast Playground</h1>
       </header>
+
+      <Toast
+        variant={variant.value}
+        onClose={() => setShowToast(false)}
+        isOpen={showToast}
+      >
+        {message.value}
+      </Toast>
 
       <div className={styles.controlsWrapper}>
         <div className={styles.row}>
@@ -59,7 +69,7 @@ const ToastPlayground = () => {
         <div className={styles.row}>
           <div className={styles.label} />
           <div className={`${styles.inputWrapper} ${styles.radioWrapper}`}>
-            <Button>Pop Toast!</Button>
+            <Button onClick={() => setShowToast(true)}>Pop Toast!</Button>
           </div>
         </div>
       </div>
