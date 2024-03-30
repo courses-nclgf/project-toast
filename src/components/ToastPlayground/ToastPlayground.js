@@ -1,17 +1,15 @@
-import React, { useCallback } from "react";
-import { useState } from "react";
+import { useContext } from "react";
 
 import Button from "../Button";
 import ToastShelf from "../ToastShelf";
 
-import styles from "./ToastPlayground.module.css";
-import { uuid } from "../../utils";
+import { VARIANT_OPTIONS } from "../Toast/constants";
+import { ToastContext } from "../Toast/states";
 
-const VARIANT_OPTIONS = ["notice", "warning", "success", "error"];
-const defaultVariant = VARIANT_OPTIONS[0];
+import styles from "./ToastPlayground.module.css";
 
 const ToastPlayground = () => {
-  const { list, message, variant } = useToastConfig();
+  const { list, message, variant } = useContext(ToastContext);
 
   return (
     <div className={styles.wrapper}>
@@ -32,7 +30,12 @@ const ToastPlayground = () => {
             Message
           </label>
           <div className={styles.inputWrapper}>
-            <ToastMessage message={message.value} onChange={message.onChange} />
+            <textarea
+              id="message"
+              className={styles.messageInput}
+              onChange={message.onChange}
+              value={message.value}
+            />
           </div>
         </div>
 
@@ -72,55 +75,3 @@ const ToastPlayground = () => {
 };
 
 export default ToastPlayground;
-
-const ToastMessage = ({ message, onChange }) => {
-  return (
-    <textarea
-      id="message"
-      className={styles.messageInput}
-      onChange={onChange}
-      value={message}
-    />
-  );
-};
-
-const useToastConfig = () => {
-  const [message, setMessage] = useState("");
-  const [variant, setVariant] = useState(defaultVariant);
-  const [toastList, setToastList] = useState([]);
-
-  const handleChangeMessage = useCallback((event) => {
-    setMessage(event.target.value);
-  }, []);
-
-  const handleChangeVariant = useCallback((event) => {
-    setVariant(event.target.value);
-  }, []);
-
-  const handleRemoveToast = useCallback((id) => {
-    setToastList((currentToastList) =>
-      currentToastList.filter((toast) => toast.id !== id)
-    );
-  }, []);
-
-  const handleAddToast = useCallback(
-    (event) => {
-      event.preventDefault();
-
-      setMessage("");
-      setVariant(defaultVariant);
-
-      setToastList((currentToastList) => [
-        ...currentToastList,
-        { id: uuid(), message, variant, onClose: handleRemoveToast },
-      ]);
-    },
-    [message, variant, handleRemoveToast]
-  );
-
-  return {
-    list: { value: toastList, onAdd: handleAddToast },
-    message: { value: message, onChange: handleChangeMessage },
-    variant: { value: variant, onChange: handleChangeVariant },
-  };
-};
