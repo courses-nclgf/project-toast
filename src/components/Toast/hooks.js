@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { uuid } from "../../utils";
 
 import { defaultVariant } from "./constants";
@@ -7,6 +7,17 @@ export const useToasts = () => {
   const [message, setMessage] = useState("");
   const [variant, setVariant] = useState(defaultVariant);
   const [toastList, setToastList] = useState([]);
+  useKeyDown(
+    useMemo(
+      () => [
+        {
+          key: "Escape",
+          callback: () => setToastList([]),
+        },
+      ],
+      []
+    )
+  );
 
   const handleChangeMessage = useCallback((event) => {
     setMessage(event.target.value);
@@ -39,24 +50,30 @@ export const useToasts = () => {
     [message, variant, handleRemoveToast]
   );
 
-  useEffect(() => {
-    const clearOnEscape = (event) => {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        setToastList([]);
-      }
-    };
-
-    window.addEventListener("keydown", clearOnEscape);
-
-    return () => {
-      window.removeEventListener("keydown", clearOnEscape);
-    };
-  }, []);
-
   return {
     list: { value: toastList, onAdd: handleAddToast },
     message: { value: message, onChange: handleChangeMessage },
     variant: { value: variant, onChange: handleChangeVariant },
   };
+};
+
+const useKeyDown = (keyCallbacks) => {
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      keyCallbacks.forEach((keyCallback) => {
+        if (keyCallback.key === event.key) {
+          event.preventDefault();
+          keyCallback.callback();
+        }
+      });
+    };
+
+    console.log("ici");
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [keyCallbacks]);
 };
