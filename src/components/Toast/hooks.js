@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { uuid } from "../../utils";
 
 import { defaultVariant } from "./constants";
@@ -38,6 +38,21 @@ export const useToasts = () => {
     },
     [message, variant, handleRemoveToast]
   );
+
+  useEffect(() => {
+    const clearOnEscape = (event) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setToastList([]);
+      }
+    };
+
+    window.addEventListener("keydown", clearOnEscape);
+
+    return () => {
+      window.removeEventListener("keydown", clearOnEscape);
+    };
+  }, []);
 
   return {
     list: { value: toastList, onAdd: handleAddToast },
